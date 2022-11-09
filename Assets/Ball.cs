@@ -2,6 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum HitType
+{
+    UP,
+    FORWARD,
+    SMASH
+}
+
+public enum HitDirection
+{
+    LEFT,
+    RIGHT
+}
+
 public class Ball : MonoBehaviour
 {
     public delegate void BallAction(int newSpeed, float ballDelay);
@@ -29,19 +42,6 @@ public class Ball : MonoBehaviour
 
     private Rigidbody2D rigidbody;
 
-    enum HitType
-    {
-        UP,
-        FORWARD,
-        SMASH
-    }
-
-    enum HitDirection
-    {
-        LEFT,
-        RIGHT
-    }
-
     void Start()
     {
         rigidbody = GetComponent<Rigidbody2D>();
@@ -54,7 +54,6 @@ public class Ball : MonoBehaviour
 
         float ratio = (float)(currentSpeed - minSpeed) / (maxSpeed - minSpeed);
         float scale = GetValue(ratio, minStretch, maxStretch);
-        print(ratio + " " + scale);
 
         model.transform.localScale = new Vector3(1 - scale / 2, 1 + scale, 1 - scale / 2);
 
@@ -94,7 +93,7 @@ public class Ball : MonoBehaviour
         currentSpeed = Mathf.Min(currentSpeed, maxSpeed);
     }
 
-    void HitInDirection(HitType type, HitDirection direction)
+    public void HitInDirection(HitType type, HitDirection direction)
     {
         StopAllCoroutines();
         StartCoroutine(HitCoroutine(type, direction));

@@ -13,6 +13,10 @@ public class Player : MonoBehaviour
     public float maxSpeed = 8;
     public float accel = 8;
 
+    private bool hitStunned;
+
+    HitType hitType;
+
     void Start()
     {
         // if (Input.GetKeyDown(KeyCode.S))
@@ -32,15 +36,27 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        if (hitStunned)
+            return;
+
         if (Input.GetButtonDown("Fire1"))
         {
             float vertical = Input.GetAxisRaw("Vertical");
             if (vertical > 0.2f)
+            {
+                hitType = HitType.UP;
                 animator.SetTrigger("Upward");
+            }
             else if (vertical < -0.2f)
+            {
+                hitType = HitType.SMASH;
                 animator.SetTrigger("Smash");
+            }
             else
+            {
+                hitType = HitType.FORWARD;
                 animator.SetTrigger("Foreward");
+            }
         }
 
 
@@ -64,6 +80,41 @@ public class Player : MonoBehaviour
         {
             rb.velocity += Vector2.down * reversalStrength * Time.deltaTime;
         }
+    }
 
+    public void HitBall(Ball ball)
+    {
+        Ball.OnBallHit += OnBallHit;
+
+        HitDirection direction = transform.localScale.x < 0 ? HitDirection.LEFT : HitDirection.RIGHT;
+        ball.HitInDirection(hitType, direction);
+    }
+
+    void OnBallHit(int newSpeed, float delay)
+    {
+        StartCoroutine(OnBallHitCoroutine(delay));
+    }
+
+    IEnumerator OnBallHitCoroutine(float delay)
+    {
+        Ball.OnBallHit -= OnBallHit;
+
+        hitStunned = true;
+        rb.simulated = false;
+        animator.speed = 0;
+
+        yield return new WaitForSeconds(delay);
+
+        hitStunned = false;
+        rb.simulated = true;
+        animator.speed = 1;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.GetComponent<Ball>())
+        {
+            HitBall(other.GetComponent<Ball>());
+        }
     }
 }
