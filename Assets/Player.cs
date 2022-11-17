@@ -6,6 +6,7 @@ public class Player : MonoBehaviour
 {
     public Rigidbody2D rb;
     public Animator animator;
+    public Collider2D batColl;
 
     public int jumpStrength = 16;
     public float reversalStrength = 4;
@@ -41,6 +42,8 @@ public class Player : MonoBehaviour
 
         if (Input.GetButtonDown("Fire1"))
         {
+            batColl.gameObject.SetActive(true);
+
             float vertical = Input.GetAxisRaw("Vertical");
             if (vertical > 0.2f)
             {
@@ -99,6 +102,7 @@ public class Player : MonoBehaviour
     {
         Ball.OnBallHit -= OnBallHit;
 
+        batColl.gameObject.SetActive(false);
         hitStunned = true;
         rb.simulated = false;
         animator.speed = 0;
