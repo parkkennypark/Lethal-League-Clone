@@ -20,19 +20,7 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        // if (Input.GetKeyDown(KeyCode.S))
-        // {
-        //     HitInDirection(HitType.UP, HitDirection.RIGHT);
-        // }
-        // if (Input.GetKeyDown(KeyCode.D))
-        // {
-        //     HitInDirection(HitType.FORWARD, HitDirection.RIGHT);
-        // }
-        // if (Input.GetKeyDown(KeyCode.F))
-        // {
-        //     HitInDirection(HitType.SMASH, HitDirection.RIGHT);
-        // }
-
+        QualitySettings.vSyncCount = 0;
     }
 
     void Update()
