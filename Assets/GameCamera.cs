@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class GameCamera : MonoBehaviour
 {
+    StressReceiver stress;
+
+    void Start()
+    {
+        stress = GetComponent<StressReceiver>();
+    }
+
     void OnEnable()
     {
         Ball.OnHitWall += OnBallHitWall;
@@ -19,11 +26,19 @@ public class GameCamera : MonoBehaviour
     void OnBallHitWall(float speed)
     {
         // GetComponent<StressReceiver>().InduceStress(0.2f);
-        GetComponent<StressReceiver>().InduceStress(1);
+        stress.InduceStress(1);
     }
 
-    void OnBallHit(int newSpeed, float delay)
+    void OnBallHit(int newSpeed, int maxSpeed, float hitRatio, float delay)
     {
-        GetComponent<StressReceiver>().InduceStress(2);
+        stress.InduceStress(2);
+        StartCoroutine(SetConstantTrauma(delay, 1));
+    }
+
+    IEnumerator SetConstantTrauma(float delay, float trauma)
+    {
+        stress.constantTrauma = 1;
+        yield return new WaitForSeconds(delay);
+        stress.constantTrauma = 0;
     }
 }

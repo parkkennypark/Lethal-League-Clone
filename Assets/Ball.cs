@@ -17,16 +17,19 @@ public enum HitDirection
 
 public class Ball : MonoBehaviour
 {
-    public delegate void BallAction(int newSpeed, float ballDelay);
+    public delegate void BallAction(int newSpeed, int maxSpeed, float hitRatio, float ballDelay);
     public static event BallAction OnBallHit;
 
     public delegate void BounceAction(float currentSpeed);
     public static event BounceAction OnHitWall;
 
+    const int trueMaxSpeed = 1000000;
+    const int trueMinSpeed = 8;
 
-    public int currentSpeed = 8;
+    public int currentSpeed = 4;
     public int minSpeed = 8;
     public int maxSpeed = 128;
+    public float maxActualVelocity = 512;
     public AnimationCurve velocityCurve;
 
     public float hitAngle = 35;
@@ -52,8 +55,7 @@ public class Ball : MonoBehaviour
         if (rigidbody.velocity.magnitude > 0.1f)
             model.transform.up = rigidbody.velocity;
 
-        float ratio = (float)(currentSpeed - minSpeed) / (maxSpeed - minSpeed);
-        float scale = GetValue(ratio, minStretch, maxStretch);
+        float scale = GetValue(GetHitRatio(), minStretch, maxStretch);
 
         model.transform.localScale = new Vector3(1 - scale / 2, 1 + scale, 1 - scale / 2);
 
@@ -78,7 +80,27 @@ public class Ball : MonoBehaviour
             delay = GetValue(ratio, minBallDelay, maxBallDelay);
         }
 
+        // float log = Mathf.Log(speed, 2);
+        // return speed * minBallDelay;
+
+        float velocityMagnitude = velocityCurve.Evaluate((GetHitRatio()));
+        return velocityMagnitude * maxBallDelay;
+
+
         return delay;
+    }
+
+    float GetHitRatio()
+    {
+        float maxLog = Mathf.Log(trueMaxSpeed, 2);
+        float minLog = Mathf.Log(trueMinSpeed, 2);
+        float log = Mathf.Log(currentSpeed, 2);
+
+        float ratio = (log - minLog) / (maxLog - minLog);
+
+        print("Ratio: " + ratio);
+
+        return ratio;
     }
 
     void AddOneToSpeed()
@@ -114,9 +136,11 @@ public class Ball : MonoBehaviour
             AddOneToSpeed();
 
         float delay = GetBallDelay(type, currentSpeed);
+        print("Delay: " + delay);
+
 
         if (OnBallHit != null)
-            OnBallHit(currentSpeed, delay);
+            OnBallHit(currentSpeed, maxSpeed, GetHitRatio(), delay);
 
         yield return new WaitForSeconds(delay);
 
@@ -130,16 +154,27 @@ public class Ball : MonoBehaviour
         else if (type == HitType.SMASH)
             angle = -hitAngle;
 
-        Vector3 dir = Quaternion.Euler(0, 0, angle) * Vector3.right * (direction == HitDirection.RIGHT ? 1 : -1);
+        int dirMult = (direction == HitDirection.RIGHT ? 1 : -1);
+        Vector3 dir = Quaternion.Euler(0, 0, angle * dirMult) * Vector3.right * dirMult;
 
-        float velocityMagnitude = velocityCurve.Evaluate((float)currentSpeed / maxSpeed);
+        float velocityMagnitude = velocityCurve.Evaluate((GetHitRatio()));
+        // float velocityMagnitude = velocityCurve.Evaluate((float)currentSpeed / maxSpeed);
 
-        rigidbody.velocity = dir * velocityMagnitude * maxSpeed;
+        rigidbody.velocity = dir * velocityMagnitude * maxActualVelocity;
     }
 
     private void OnCollisionEnter2D(Collision2D other)
     {
         if (OnHitWall != null)
             OnHitWall(currentSpeed);
+
+        // StartCoroutine(PauseBall(0.05f));
+    }
+
+    IEnumerator PauseBall(float delay)
+    {
+        rigidbody.simulated = false;
+        yield return new WaitForSeconds(delay);
+        rigidbody.simulated = true;
     }
 }

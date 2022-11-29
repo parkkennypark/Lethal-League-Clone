@@ -9,6 +9,11 @@ public class SpeedCounter : MonoBehaviour
 
     float currentBallSpeed;
 
+    void Start()
+    {
+        text.text = "0";
+    }
+
     void OnEnable()
     {
         Ball.OnBallHit += OnBallHit;
@@ -19,7 +24,7 @@ public class SpeedCounter : MonoBehaviour
         Ball.OnBallHit -= OnBallHit;
     }
 
-    void OnBallHit(int newSpeed, float delay)
+    void OnBallHit(int newSpeed, int maxSpeed, float hitRatio, float delay)
     {
         if (newSpeed == currentBallSpeed + 1)
         {

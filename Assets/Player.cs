@@ -81,7 +81,7 @@ public class Player : MonoBehaviour
         ball.HitInDirection(hitType, direction);
     }
 
-    void OnBallHit(int newSpeed, float delay)
+    void OnBallHit(int newSpeed, int maxSpeed, float hitRatio, float delay)
     {
         StartCoroutine(OnBallHitCoroutine(delay));
     }

@@ -16,7 +16,7 @@ public class BallDelayFill : MonoBehaviour
         Ball.OnBallHit -= OnBallHit;
     }
 
-    void OnBallHit(int newSpeed, float delay)
+    void OnBallHit(int newSpeed, int maxSpeed, float hitRatio, float delay)
     {
         StartCoroutine(FillBar(delay));
     }
@@ -33,5 +33,7 @@ public class BallDelayFill : MonoBehaviour
             current += Time.deltaTime;
             yield return null;
         }
+
+        fillBar.localScale = new Vector3(1, 1, 1);
     }
 }

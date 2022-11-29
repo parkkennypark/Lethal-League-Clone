@@ -14,8 +14,13 @@ public class StressReceiver : MonoBehaviour
 
     public float traumaDecaySpeed = 1;
 
+    public float constantTrauma = 0;
+
     private void Update()
     {
+        if (constantTrauma > 0)
+            _trauma = constantTrauma;
+
         float shake = Mathf.Pow(_trauma, TraumaExponent);
         /* Only apply this when there is active trauma */
         if (shake > 0)
